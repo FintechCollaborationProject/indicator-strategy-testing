@@ -92,7 +92,7 @@ def main():
     end_date = "2021-01-01"
     interval = "1d"
     initial_balance = 100000  # Example initial balance
-    indicators_to_use = ['BollingerBands', 'ADX', 'RSI']  # User-defined list of indicators
+    indicators_to_use = ['BollingerBands', 'ADX', 'RSI']  # User-defined list of indicators, CROSS; AUX: AUX
 
     # Initialize the backtester
     backtester = FinanceBacktester(ticker, start_date, end_date, interval, initial_balance)
