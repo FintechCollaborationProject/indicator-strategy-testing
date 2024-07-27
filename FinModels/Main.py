@@ -91,8 +91,8 @@ def main():
     start_date = "2020-01-01"
     end_date = "2021-01-01"
     interval = "1d"
-    initial_balance = 10000  # Example initial balance
-    indicators_to_use = ['VortexIndicator', 'EMA', 'RSI', 'MACD', 'BollingerBands']  # User-defined list of indicators
+    initial_balance = 100000  # Example initial balance
+    indicators_to_use = ['BollingerBands', 'ADX', 'RSI']  # User-defined list of indicators
 
     # Initialize the backtester
     backtester = FinanceBacktester(ticker, start_date, end_date, interval, initial_balance)
