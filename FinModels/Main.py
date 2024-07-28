@@ -43,7 +43,7 @@ class FinanceBacktester:
                 if indicator_name == 'EMA':
                     indicators.append(indicator_class(self.data, short_window=5, long_window=10))
                 elif indicator_name == 'BollingerBands':
-                    indicators.append(indicator_class(self.data, window=20, no_of_std=2))
+                    indicators.append(indicator_class(self.data, window=20, num_std_dev=2))
                 else:
                     indicators.append(indicator_class(self.data))
         self.strategy = CombinedIndicatorStrategy(indicators)
