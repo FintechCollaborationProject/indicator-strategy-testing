@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 class Backtest:
     def __init__(self, strategy, data, initial_balance):
@@ -64,26 +65,16 @@ class Backtest:
 
         :return: The annualized return as a percentage.
         """
-        self.history['Date'] = pd.to_datetime(self.history['Date'])
-        self.history.set_index('Date', inplace=True)
-        num_days = (self.history.index[-1] - self.history.index[0]).days
+        history_df = pd.DataFrame(self.history)
+        history_df['Date'] = pd.to_datetime(history_df['Date'])
+        history_df.set_index('Date', inplace=True)
+        
+        num_days = (history_df.index[-1] - history_df.index[0]).days
+        print(f"*****backtest number of days: {num_days}")
 
         if num_days > 0:
-            total_return = (self.history['Profit'].sum() + self.initial_balance) / self.initial_balance
+            total_return = (history_df['Profit'].sum() + self.initial_balance) / self.initial_balance
             annualized_return = (total_return ** (365 / num_days)) - 1
             return annualized_return * 100  # Convert to percentage
         else:
             return 0
-
-    def max_drawdown(self):
-        """
-        Calculate the maximum drawdown of the portfolio.
-
-        :return: The maximum drawdown as a percentage.
-        """
-        if 'Portfolio Value' not in self.history.columns:
-            self.history['Portfolio Value'] = self.initial_balance + self.history['Profit'].cumsum()
-
-        running_max = self.history['Portfolio Value'].cummax()
-        drawdown = (self.history['Portfolio Value'] - running_max) / running_max
-        return drawdown.min() * 100  # Convert to percentage

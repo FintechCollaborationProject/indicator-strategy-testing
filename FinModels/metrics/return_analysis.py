@@ -3,12 +3,6 @@ import numpy as np
 
 class ReturnAnalysis:
     def __init__(self, returns):
-        """
-        Initialize the ReturnAnalysis object with annual return rates.
-
-        :param returns: List or array-like of annual return rates in percentage (e.g., 5.0 for 5%).
-        """
-        # Validate the returns input
         if not isinstance(returns, (list, np.ndarray)) or len(returns) == 0:
             raise ValueError("Returns must be a non-empty list or array-like of numbers.")
 
@@ -23,11 +17,6 @@ class ReturnAnalysis:
         self.max_return = np.max(self.returns)
 
     def get_summary(self):
-        """
-        Get a summary of the return analysis.
-
-        :return: Dictionary containing summary statistics of returns.
-        """
         return {
             "Number of Years": self.num_years,
             "Average Return Rate (%)": self.avg_return,
@@ -47,3 +36,5 @@ class ReturnAnalysis:
         """
         summary = self.get_summary()
         return pd.DataFrame([summary])
+
+
