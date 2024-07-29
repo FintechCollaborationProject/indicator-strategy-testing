@@ -28,7 +28,7 @@ class BacktestMetrics:
         self.history.set_index('Date', inplace=True)
         num_days = (self.history.index[-1] - self.history.index[0]).days
         total_return = self.history['Portfolio Value'].iloc[-1] / self.history['Portfolio Value'].iloc[0] - 1
-        annualized_return = (1 + total_return) ** (365.0 / num_days) - 1
+        annualized_return = (1 + total_return) ** (365.0 / num_days) - 1 if num_days > 0 else 0
         return annualized_return * 100
 
     def sharpe_ratio(self, risk_free_rate=0.01):
