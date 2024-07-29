@@ -1,4 +1,4 @@
-class VortexIndicator:
+class VI:
     def __init__(self, prices, window=14):
         self.prices = prices
         self.window = window

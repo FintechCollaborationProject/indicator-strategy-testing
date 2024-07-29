@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-class BollingerBands:
+class BB:
     def __init__(self, prices, window=20, num_std_dev=2):
         self.prices = prices
         self.window = window

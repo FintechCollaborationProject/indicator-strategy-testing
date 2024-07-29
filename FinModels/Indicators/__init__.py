@@ -1,17 +1,17 @@
-from .bollinger_bands import BollingerBands
+from .bollinger_bands import BB
 from .ema import EMA
-from .keltner_channel import KeltnerChannel
+from .keltner_channel import KC
 from .macd import MACD
 from .rsi import RSI
-from .vortex_indicator import VortexIndicator
+from .vortex_indicator import VI
 from .adx import ADX
 
 __all__ = [
-    'BollingerBands',
+    'BB',
     'EMA',
-    'KeltnerChannel',
+    'KC',
     'MACD',
     'RSI',
-    'VortexIndicator',
+    'VI',
     'ADX'
 ]

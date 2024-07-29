@@ -1,5 +1,5 @@
 import pandas as pd
-from Indicators import ADX, BollingerBands, EMA, KeltnerChannel, MACD, RSI, VortexIndicator
+from Indicators import ADX, BB, EMA, KC, MACD, RSI, VI
 from data.yahoo_finance_data import YahooFinanceData
 from strategies.combined_indicator_strategy import CombinedIndicatorStrategy
 from backtesting.backtest import Backtest
@@ -16,12 +16,12 @@ class FinanceBacktester:
         self.data = None
         self.strategy = None
         self.indicator_classes = {
-            'VortexIndicator': VortexIndicator,
+            'VI': VI,
             'EMA': EMA,
             'RSI': RSI,
             'ADX': ADX,
-            'BollingerBands': BollingerBands,
-            'KeltnerChannel': KeltnerChannel,
+            'BB': BB,
+            'KC': KC,
             'MACD': MACD
         }
 
@@ -59,7 +59,7 @@ class FinanceBacktester:
     def _get_indicator_params(self, indicator_name):
         params = {
             'EMA': {'short_window': 5, 'long_window': 10},
-            'BollingerBands': {'window': 20, 'num_std_dev': 2}
+            'BB': {'window': 20, 'num_std_dev': 2}
         }
         return params.get(indicator_name, {})
 
@@ -132,12 +132,12 @@ class FinanceBacktester:
             print("No annual returns data available.")
 
 def main():
-    ticker = "GOOGL"
-    start_date = "2000-01-01"
+    ticker = "BTC-USD"
+    start_date = "2022-01-01"
     end_date = "2023-01-01"
     interval = "1d"
     initial_balance = 100000
-    indicators_to_use = ['BollingerBands']
+    indicators_to_use = ["VI"]
     
     backtester = FinanceBacktester(ticker, start_date, end_date, interval, initial_balance)
     backtester.fetch_data()

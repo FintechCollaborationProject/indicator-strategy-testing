@@ -1,4 +1,6 @@
-class KeltnerChannel:
+import numpy as np
+
+class KC:
     def __init__(self, prices, window=20, multiplier=2):
         self.prices = prices
         self.window = window
