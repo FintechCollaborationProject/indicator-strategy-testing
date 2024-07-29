@@ -26,26 +26,29 @@ class CombinedIndicatorStrategy:
 
         # Get the CROSS signals from the first indicator
         buy, sell = self.indicators[0].cross_signal()
-        print(f"Cross signals - Buy: {buy}, Sell: {sell}")  # Debugging line
+        print(f"Cross signals - Buy: {buy.head()}, Sell: {sell.head()}")  # Debugging line
         buy_signals.append(buy)
         sell_signals.append(sell)
 
         # Get AUX signals from the second indicator, if present
         if len(self.indicators) > 1:
             buy, sell = self.indicators[1].aux_signal()
-            print(f"AUX signals - Buy: {buy}, Sell: {sell}")  # Debugging line
+            print(f"AUX signals - Buy: {buy.head()}, Sell: {sell.head()}")  # Debugging line
             buy_signals.append(buy)
             sell_signals.append(sell)
 
         # Get AUX signals from the third indicator, if present
         if len(self.indicators) > 2:
             buy, sell = self.indicators[2].aux_signal()
-            print(f"AUX signals - Buy: {buy}, Sell: {sell}")  # Debugging line
+            print(f"AUX signals - Buy: {buy.head()}, Sell: {sell.head()}")  # Debugging line
             buy_signals.append(buy)
             sell_signals.append(sell)
 
-    # Combine the signals
-        combined_buy_signal = pd.concat(buy_signals, axis=1).all(axis=1)
-        combined_sell_signal = pd.concat(sell_signals, axis=1).all(axis=1)
+        # Combine the signals (consider changing 'all' to 'any' if you want to act on any signal)
+        combined_buy_signal = pd.concat(buy_signals, axis=1).any(axis=1)
+        combined_sell_signal = pd.concat(sell_signals, axis=1).any(axis=1)
+
+        print(f"Combined Buy Signal: {combined_buy_signal.head()}")  # Debugging line
+        print(f"Combined Sell Signal: {combined_sell_signal.head()}")  # Debugging line
 
         return combined_buy_signal, combined_sell_signal

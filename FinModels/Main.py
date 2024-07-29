@@ -1,11 +1,9 @@
-# Import your modules
-from Indicators import ADX, BollingerBands, EMA, KeltnerChannel, MACD, RSI, VortexIndicator
-from data.yahoo_finance_data import YahooFinanceData
-from strategies.combined_indicator_strategy import CombinedIndicatorStrategy
-from backtesting.backtest import Backtest
-from metrics import BacktestMetrics, ReturnAnalysis, TGR, CAGR
-import yfinance as yf
-
+from FinModels.Indicators import ADX, BollingerBands, EMA, KeltnerChannel, MACD, RSI, VortexIndicator
+from FinModels.data.yahoo_finance_data import YahooFinanceData
+from FinModels.strategies.combined_indicator_strategy import CombinedIndicatorStrategy
+from FinModels.backtesting.backtest import Backtest
+from FinModels.metrics import BacktestMetrics, ReturnAnalysis, TGR, CAGR
+import pandas as pd
 
 class FinanceBacktester:
     def __init__(self, ticker, start_date, end_date, interval, initial_balance):
@@ -30,14 +28,15 @@ class FinanceBacktester:
         yahoo_data = YahooFinanceData(self.ticker, self.start_date, self.end_date, self.interval)
         yahoo_data.fetch_data()
         self.data = yahoo_data.get_data()
-        self.data.index = pd.to_datetime(self.data.index)  # Convert the index to datetime format
-        # Debugging lines
-        print("Data fetched:")  # Check the first few rows of the data
-        print(self.data.head())  
-        print("Columns in the data:")  # Check the column names
-        print(self.data.columns)
-        # End of debugging lines
-        
+        if self.data is not None:
+            self.data.index = pd.to_datetime(self.data.index)  # Convert the index to datetime format
+            print("Data fetched:")
+            print(self.data.head())  
+            print("Columns in the data:")
+            print(self.data.columns)
+        else:
+            print("No data fetched.")
+
     def initialize_indicators(self, indicators_to_use):
         indicators = []
         for indicator_name in indicators_to_use:
@@ -53,64 +52,72 @@ class FinanceBacktester:
 
     def run_backtest(self):
         if self.data is not None and self.strategy is not None:
-            backtest = Backtest(self.strategy, self.data, self.initial_balance)
+            backtest = Backtest(self.strategy, self.data, self.initial_balance)      
             backtest_history = backtest.execute()
+            
+            # Check if 'Date' is already in columns and if not, handle it
+            if 'Date' not in backtest_history.columns and 'index' in backtest_history.columns:
+                backtest_history.rename(columns={'index': 'Date'}, inplace=True)
+            backtest_history.reset_index(inplace=True)
+            
+            # Remove any duplicate columns if present
+            backtest_history = backtest_history.loc[:, ~backtest_history.columns.duplicated()]
+            
+            print("Backtest history data after processing:")
+            print(backtest_history.head())
+            print("Columns in backtest history:", backtest_history.columns)
+            
             return backtest_history
         else:
             print("Data or Strategy not initialized.")
             return None
 
     def analyze_metrics(self, backtest_history):
-        if backtest_history is not None:
-            metrics = BacktestMetrics(backtest_history, self.initial_balance)
-            print("Backtest history data:")  # Debugging line
-            print(backtest_history.head())  # Debugging line: check the content of backtest_history
+        if backtest_history is not None and not backtest_history.empty:
+            print("Backtest history data:")
+            print(backtest_history.head())
+            print("Columns in backtest history:", backtest_history.columns)
+            metrics = BacktestMetrics(backtest_history, self.initial_balance)        
+
             all_metrics = metrics.calculate_all_metrics()
             annual_returns = metrics.calculate_annual_returns()
             return all_metrics, annual_returns
         else:
-            print("Backtest history is None.")
+            print("Backtest history is None or empty.")
             return None, None
 
     def print_results(self, all_metrics, annual_returns):
-        print("\\nPerformance Metrics:")
+        print("\nPerformance Metrics:")
         for key, value in all_metrics.items():
             print(f"{key}: {value:.2f}")
 
-        print("\\nAnnual Returns:")
+        print("\nAnnual Returns:")
         print(annual_returns)
 
         return_analysis = ReturnAnalysis(annual_returns)
-        print("\\nReturn Analysis Summary:")
+        print("\nReturn Analysis Summary:")
         print(return_analysis.get_summary())
 
         tgr = TGR(annual_returns)
-        print(f"\\nTotal Growth Rate (TGR): {tgr.calculate():.2f}%")
+        print(f"\nTotal Growth Rate (TGR): {tgr.calculate():.2f}%")
 
         cagr = CAGR(annual_returns)
         print(f"Compound Annual Growth Rate (CAGR): {cagr.calculate():.2f}%")
 
 def main():
-    # Set up the parameters
     ticker = "AAPL"
-    start_date = "2015-01-01"
+    start_date = "2022-06-01"
     end_date = "2023-01-01"
     interval = "1d"
-    initial_balance = 100000  # Example initial balance
-    indicators_to_use = ['BollingerBands']  # User-defined list of indicators, CROSS; AUX: AUX
+    initial_balance = 100000
+    indicators_to_use = ['BollingerBands', "RSI"]
 
-    # Initialize the backtester
     backtester = FinanceBacktester(ticker, start_date, end_date, interval, initial_balance)
     backtester.fetch_data()
     backtester.initialize_indicators(indicators_to_use)
 
-    # Run backtest
     backtest_history = backtester.run_backtest()
-
-    # Analyze metrics
     all_metrics, annual_returns = backtester.analyze_metrics(backtest_history)
-
-    # Print results
     backtester.print_results(all_metrics, annual_returns)
 
 if __name__ == "__main__":
