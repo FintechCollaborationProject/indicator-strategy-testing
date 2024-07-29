@@ -1,11 +1,3 @@
-import sys
-import os
-import pandas as pd
-
-# Add the FinModels directory to the Python path
-finmodels_path = r'C:\Users\DaComputs\Documents\GitHub\FinResearch\FinModels'
-sys.path.append(finmodels_path)
-
 # Import your modules
 from Indicators import ADX, BollingerBands, EMA, KeltnerChannel, MACD, RSI, VortexIndicator
 from data.yahoo_finance_data import YahooFinanceData
