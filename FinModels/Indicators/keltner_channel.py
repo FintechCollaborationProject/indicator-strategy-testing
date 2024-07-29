@@ -1,6 +1,3 @@
-import numpy as np
-import pandas as pd
-
 class KeltnerChannel:
     def __init__(self, prices, window=20, multiplier=2):
         self.prices = prices

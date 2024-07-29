@@ -1,6 +1,3 @@
-import numpy as np
-import pandas as pd
-
 class MACD:
     def __init__(self, prices, short_window=12, long_window=26, signal_window=9):
         self.prices = prices

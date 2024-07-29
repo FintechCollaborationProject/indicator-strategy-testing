@@ -18,6 +18,9 @@ class BacktestMetrics:
 
         :return: Total return as a percentage.
         """
+        if self.history.empty:
+            print("Warning: History is empty. Returning 0 for total return.")
+            return 0  # or another appropriate value or raise an exception
         final_balance = self.history.iloc[-1]['Profit'] + self.initial_balance
         total_return = (final_balance - self.initial_balance) / self.initial_balance * 100
         return total_return

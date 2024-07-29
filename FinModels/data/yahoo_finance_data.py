@@ -1,5 +1,4 @@
 import yfinance as yf
-import pandas as pd
 
 class YahooFinanceData:
     def __init__(self, ticker, start_date, end_date, interval='1d'):

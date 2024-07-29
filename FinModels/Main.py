@@ -1,15 +1,17 @@
+import sys
+import os
+
+# Add the FinModels directory to the Python path
+finmodels_path = r'C:\Users\DaComputs\Documents\GitHub\FinResearch\FinModels'
+sys.path.append(finmodels_path)
+
+# Import your modules
+from Indicators import ADX, BollingerBands, EMA, KeltnerChannel, MACD, RSI, VortexIndicator
 from data.yahoo_finance_data import YahooFinanceData
-from Indicators.adx import ADX
-from Indicators.bollinger_bands import BollingerBands
-from Indicators.ema import EMA
-from Indicators.keltner_channel import KeltnerChannel
-from Indicators.macd import MACD
-from Indicators.rsi import RSI
-from Indicators.vortex_indicator import VortexIndicator
 from strategies.combined_indicator_strategy import CombinedIndicatorStrategy
 from backtesting.backtest import Backtest
 from metrics import BacktestMetrics, ReturnAnalysis, TGR, CAGR
-import pandas as pd
+
 
 class FinanceBacktester:
     def __init__(self, ticker, start_date, end_date, interval, initial_balance):
@@ -110,3 +112,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    

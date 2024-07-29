@@ -1,6 +1,3 @@
-import numpy as np
-import pandas as pd
-
 class EMA:
     def __init__(self, prices, short_window=5, long_window=10):
         self.prices = prices

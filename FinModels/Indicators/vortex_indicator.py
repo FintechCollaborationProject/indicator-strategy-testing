@@ -1,6 +1,3 @@
-import numpy as np
-import pandas as pd
-
 class VortexIndicator:
     def __init__(self, prices, window=14):
         self.prices = prices
