@@ -1,11 +1,11 @@
-
-from FinModels.Indicators import ADX, BollingerBands, EMA, KeltnerChannel, MACD, RSI, VortexIndicator
-from FinModels.data.yahoo_finance_data import YahooFinanceData
-from FinModels.strategies.combined_indicator_strategy import CombinedIndicatorStrategy
-from FinModels.backtesting.backtest import Backtest
-from FinModels.metrics import BacktestMetrics, ReturnAnalysis, TGR, CAGR
+from Indicators import ADX, BollingerBands, EMA, KeltnerChannel, MACD, RSI, VortexIndicator
+from data.yahoo_finance_data import YahooFinanceData
+from strategies.combined_indicator_strategy import CombinedIndicatorStrategy
+from backtesting.backtest import Backtest
+from metrics import BacktestMetrics, ReturnAnalysis, TGR, CAGR
 import pandas as pd
 import yfinance as yf
+import numpy as np
 
 class FinanceBacktester:
     def __init__(self, ticker, start_date, end_date, interval, initial_balance):
