@@ -4,6 +4,7 @@ from FinModels.strategies.combined_indicator_strategy import CombinedIndicatorSt
 from FinModels.backtesting.backtest import Backtest
 from FinModels.metrics import BacktestMetrics, ReturnAnalysis, TGR, CAGR
 import pandas as pd
+import yfinance as yf
 
 class FinanceBacktester:
     def __init__(self, ticker, start_date, end_date, interval, initial_balance):
@@ -105,7 +106,7 @@ class FinanceBacktester:
         print(f"Compound Annual Growth Rate (CAGR): {cagr.calculate():.2f}%")
 
 def main():
-    ticker = "AAPL"
+    ticker = "GOOGL"
     start_date = "2022-06-01"
     end_date = "2023-01-01"
     interval = "1d"
