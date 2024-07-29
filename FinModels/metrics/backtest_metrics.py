@@ -18,6 +18,9 @@ class BacktestMetrics:
         # Calculate the Portfolio Value at each point
         self.history['Portfolio Value'] = self.initial_balance + self.history['Profit'].cumsum()
 
+        # Ensure 'Date' is in datetime format
+        self.history['Date'] = pd.to_datetime(self.history['Date'])
+
     def total_return(self):
         """
         Calculate the total return of the backtest.
@@ -39,14 +42,13 @@ class BacktestMetrics:
         if self.history.empty:
             return 0.0
 
-        self.history['Date'] = pd.to_datetime(self.history['Date'])
         num_days = (self.history['Date'].iloc[-1] - self.history['Date'].iloc[0]).days
 
         if num_days <= 0:
             return 0.0
 
         total_return = self.history['Portfolio Value'].iloc[-1] / self.initial_balance - 1
-        annualized_return = (1 + total_return) ** (365.0 / num_days) - 1
+        annualized_return = (1 + total_return) ** (365.25 / num_days) - 1
         return annualized_return * 100
 
     def sharpe_ratio(self, risk_free_rate=0.01):
@@ -60,7 +62,7 @@ class BacktestMetrics:
             return 0.0
 
         returns = self.history['Profit'] / self.initial_balance
-        excess_returns = returns - risk_free_rate / 365  # Assuming daily returns
+        excess_returns = returns - risk_free_rate / 365.25  # Assuming daily returns
 
         if excess_returns.std() == 0:
             return 0.0
@@ -88,11 +90,15 @@ class BacktestMetrics:
 
         :return: Dictionary of all calculated metrics.
         """
+        # Calculate the number of years based on the actual time period covered
+        num_days = (self.history['Date'].max() - self.history['Date'].min()).days
+        num_years = num_days / 365.25
         metrics = {
             'Total Return (%)': self.total_return(),
             'Annualized Return (%)': self.annualized_return(),
             'Sharpe Ratio': self.sharpe_ratio(),
-            'Max Drawdown (%)': self.max_drawdown()
+            'Max Drawdown (%)': self.max_drawdown(),
+            'Number of Years': num_years
         }
         return metrics
 

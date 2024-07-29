@@ -24,4 +24,3 @@ class TGR:
 # Example usage:
 #tgr_calculator = TGR([10, -5, 15])
 #print(tgr_calculator.calculate())  # Output will be the TGR as a percentage
-

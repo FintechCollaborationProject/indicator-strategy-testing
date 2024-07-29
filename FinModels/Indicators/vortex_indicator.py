@@ -1,18 +1,21 @@
+import pandas as pd
+import numpy as np
+
 class VI:
     def __init__(self, prices, window=14):
         self.prices = prices
         self.window = window
         self.vi_plus, self.vi_minus = self.calculate_vi()
-    
+
     def calculate_vi(self):
         high_low = self.prices['High'] - self.prices['Low']
-        high_close_prev = abs(self.prices['High'] - self.prices['Close'].shift(1))
-        low_close_prev = abs(self.prices['Low'] - self.prices['Close'].shift(1))
+        high_close_prev = np.abs(self.prices['High'] - self.prices['Close'].shift(1))
+        low_close_prev = np.abs(self.prices['Low'] - self.prices['Close'].shift(1))
 
         true_range = pd.DataFrame([high_low, high_close_prev, low_close_prev]).max()
 
-        vm_plus = abs(self.prices['High'] - self.prices['Low'].shift(1))
-        vm_minus = abs(self.prices['Low'] - self.prices['High'].shift(1))
+        vm_plus = np.abs(self.prices['High'] - self.prices['Low'].shift(1))
+        vm_minus = np.abs(self.prices['Low'] - self.prices['High'].shift(1))
 
         sum_tr = true_range.rolling(window=self.window).sum()
         sum_vm_plus = vm_plus.rolling(window=self.window).sum()

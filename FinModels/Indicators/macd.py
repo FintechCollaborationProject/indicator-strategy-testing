@@ -1,3 +1,5 @@
+import pandas as pd
+
 class MACD:
     def __init__(self, prices, short_window=12, long_window=26, signal_window=9):
         self.prices = prices
@@ -7,8 +9,8 @@ class MACD:
         self.macd_line, self.signal_line, self.histogram = self.calculate_macd()
     
     def calculate_macd(self):
-        short_ema = self.prices.ewm(span=self.short_window, adjust=False).mean()
-        long_ema = self.prices.ewm(span=self.long_window, adjust=False).mean()
+        short_ema = self.prices['Close'].ewm(span=self.short_window, adjust=False).mean()
+        long_ema = self.prices['Close'].ewm(span=self.long_window, adjust=False).mean()
         macd_line = short_ema - long_ema
         signal_line = macd_line.ewm(span=self.signal_window, adjust=False).mean()
         histogram = macd_line - signal_line

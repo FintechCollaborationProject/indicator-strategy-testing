@@ -34,3 +34,4 @@ class CAGR:
 # Example usage:
 #cagr_calculator = CAGR([10, -5, 15])
 #print(cagr_calculator.calculate())  # Output will be the CAGR as a percentage
+

@@ -50,16 +50,24 @@ class FinanceBacktester:
             indicator_class = self.indicator_classes.get(indicator_name)
             if indicator_class:
                 params = self._get_indicator_params(indicator_name)
-                # Adjust the instantiation if the number of parameters differs
-                indicators.append(indicator_class(numeric_data, **params))
+                # Adjust the instantiation for indicators that require specific parameters
+                if indicator_name == 'EMA':
+                    indicators.append(indicator_class(numeric_data, params['short_window'], params['long_window']))
+                else:
+                    indicators.append(indicator_class(numeric_data, **params))
             else:
                 print(f"Warning: Indicator '{indicator_name}' not found.")
         self.strategy = CombinedIndicatorStrategy(indicators)
 
     def _get_indicator_params(self, indicator_name):
         params = {
-            'EMA': {'short_window': 5, 'long_window': 10},
-            'BB': {'window': 20, 'num_std_dev': 2}
+            'EMA': {'short_window': 12, 'long_window': 26},
+            'BB': {'window': 20, 'num_std_dev': 2},
+            'ADX': {'window': 14},
+            'MACD': {'short_window': 12, 'long_window': 26, 'signal_window': 9},
+            'RSI': {'window': 14},
+            'KC': {'window': 20, 'multiplier': 2},
+            'VI': {'window': 14}
         }
         return params.get(indicator_name, {})
 
@@ -101,6 +109,8 @@ class FinanceBacktester:
             all_metrics = metrics.calculate_all_metrics()
             annual_returns = metrics.calculate_annual_returns()
 
+            print(f"Annual Returns: {annual_returns}")  # Debug print to see annual returns
+
             if len(annual_returns) == 0:
                 print("No annual returns data available.")
                 return all_metrics, None
@@ -124,6 +134,8 @@ class FinanceBacktester:
             return_analysis = ReturnAnalysis(annual_returns)
             print("\nReturn Analysis Summary:")
             print(return_analysis.get_summary())
+            
+            # Calculate TGR and CAGR
             tgr = TGR(annual_returns)
             print(f"\nTotal Growth Rate (TGR): {tgr.calculate():.2f}%")
             cagr = CAGR(annual_returns)
@@ -131,13 +143,17 @@ class FinanceBacktester:
         else:
             print("No annual returns data available.")
 
-def main():
+def configure_backtest():
     ticker = "BTC-USD"
-    start_date = "2022-01-01"
+    start_date = "2020-01-01"
     end_date = "2023-01-01"
     interval = "1d"
     initial_balance = 100000
-    indicators_to_use = ["VI"]
+    indicators_to_use = ["BB"]
+    return ticker, start_date, end_date, interval, initial_balance, indicators_to_use
+
+def run():
+    ticker, start_date, end_date, interval, initial_balance, indicators_to_use = configure_backtest()
     
     backtester = FinanceBacktester(ticker, start_date, end_date, interval, initial_balance)
     backtester.fetch_data()
@@ -147,4 +163,4 @@ def main():
     backtester.print_results(all_metrics, annual_returns)
 
 if __name__ == "__main__":
-    main()
+    run()

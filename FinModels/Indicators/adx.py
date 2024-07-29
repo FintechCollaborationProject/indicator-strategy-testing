@@ -10,13 +10,21 @@ class ADX:
         self.adx = self.calculate_adx()
     
     def calculate_adx(self):
-        plus_dm = self.prices.diff().clip(lower=0)
-        minus_dm = -self.prices.diff().clip(upper=0)
-        atr = self.prices.rolling(window=self.window).apply(lambda x: np.max(x) - np.min(x), raw=True)
+        high = self.prices['High']
+        low = self.prices['Low']
+        close = self.prices['Close']
+
+        plus_dm = np.where((high.diff() > low.diff()) & (high.diff() > 0), high.diff(), 0)
+        minus_dm = np.where((low.diff() > high.diff()) & (low.diff() > 0), low.diff(), 0)
+
+        atr = (high.combine(low, max) - high.combine(low, min)).rolling(window=self.window).mean()
+
         plus_di = 100 * (plus_dm / atr).ewm(span=self.window, adjust=False).mean()
         minus_di = 100 * (minus_dm / atr).ewm(span=self.window, adjust=False).mean()
-        dx = 100 * np.abs((plus_di - minus_di) / (plus_di + minus_di))
+
+        dx = 100 * np.abs((plus_di - minus_di) / (plus_di + minus_di)).fillna(0)
         adx = dx.ewm(span=self.window, adjust=False).mean()
+        
         return adx
 
     def aux_signal(self):

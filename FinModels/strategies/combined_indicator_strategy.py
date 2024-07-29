@@ -38,22 +38,17 @@ class CombinedIndicatorStrategy:
 
         # Process the first indicator (CROSS signal)
         cross_buy, cross_sell = self.indicators[0].cross_signal()
-        print(f"Cross signals - Buy: {cross_buy.head()}, Sell: {cross_sell.head()}")  # Debugging line
         buy_signals.append(cross_buy)
         sell_signals.append(cross_sell)
 
         # Process subsequent indicators (AUX signals)
         for indicator in self.indicators[1:]:
             aux_buy, aux_sell = indicator.aux_signal()
-            print(f"AUX signals - Buy: {aux_buy.head()}, Sell: {aux_sell.head()}")  # Debugging line
             buy_signals.append(aux_buy)
             sell_signals.append(aux_sell)
 
         # Combine the signals using 'any' to generate a signal if any of the conditions are met
         combined_buy_signal = pd.concat(buy_signals, axis=1).any(axis=1)
         combined_sell_signal = pd.concat(sell_signals, axis=1).any(axis=1)
-
-        print(f"Combined Buy Signal: {combined_buy_signal.head()}")  # Debugging line
-        print(f"Combined Sell Signal: {combined_sell_signal.head()}")  # Debugging line
 
         return combined_buy_signal, combined_sell_signal
