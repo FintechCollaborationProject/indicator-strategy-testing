@@ -1,8 +1,10 @@
-import numpy as np
 import pandas as pd
+import numpy as np
 
 class ADX:
     def __init__(self, prices, window=14):
+        if prices.empty:
+            raise ValueError("Input data is empty.")
         self.prices = prices
         self.window = window
         self.adx = self.calculate_adx()

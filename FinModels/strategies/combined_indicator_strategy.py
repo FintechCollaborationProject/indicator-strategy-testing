@@ -3,48 +3,53 @@ import numpy as np
 
 class CombinedIndicatorStrategy:
     def __init__(self, indicators):
+        """
+        Initialize the CombinedIndicatorStrategy with a list of indicators.
+
+        :param indicators: A list of indicator objects.
+        """
         self.indicators = indicators
         self.validate_indicators()
     
     def validate_indicators(self):
-        # Check the first indicator is a CROSS
-        if not hasattr(self.indicators[0], 'cross_signal'):
-            raise ValueError("The first indicator must be a CROSS type.")
+        """
+        Validate the indicators to ensure they meet the expected types and attributes.
+        """
+        if not self.indicators:
+            raise ValueError("No indicators provided. At least one indicator is required.")
 
-        # Check the second and third indicators, if present, are AUX
-        if len(self.indicators) > 1:
-            if not hasattr(self.indicators[1], 'aux_signal'):
-                raise ValueError("The second indicator must be an AUX type.")
-        if len(self.indicators) > 2:
-            if not hasattr(self.indicators[2], 'aux_signal'):
-                raise ValueError("The third indicator must be an AUX type.")
+        # Check the first indicator for the 'cross_signal' method
+        if not hasattr(self.indicators[0], 'cross_signal') or not callable(getattr(self.indicators[0], 'cross_signal')):
+            raise ValueError("The first indicator must have a 'cross_signal' method.")
+
+        # Check subsequent indicators for the 'aux_signal' method
+        for i, indicator in enumerate(self.indicators[1:], start=1):
+            if not hasattr(indicator, 'aux_signal') or not callable(getattr(indicator, 'aux_signal')):
+                raise ValueError(f"The indicator at position {i + 1} must have an 'aux_signal' method.")
     
     def generate_signals(self):
-        # Initialize lists to hold buy and sell signals
+        """
+        Generate buy and sell signals by combining signals from the provided indicators.
+
+        :return: Two Series objects representing combined buy and sell signals.
+        """
         buy_signals = []
         sell_signals = []
 
-        # Get the CROSS signals from the first indicator
-        buy, sell = self.indicators[0].cross_signal()
-        print(f"Cross signals - Buy: {buy.head()}, Sell: {sell.head()}")  # Debugging line
-        buy_signals.append(buy)
-        sell_signals.append(sell)
+        # Process the first indicator (CROSS signal)
+        cross_buy, cross_sell = self.indicators[0].cross_signal()
+        print(f"Cross signals - Buy: {cross_buy.head()}, Sell: {cross_sell.head()}")  # Debugging line
+        buy_signals.append(cross_buy)
+        sell_signals.append(cross_sell)
 
-        # Get AUX signals from the second indicator, if present
-        if len(self.indicators) > 1:
-            buy, sell = self.indicators[1].aux_signal()
-            print(f"AUX signals - Buy: {buy.head()}, Sell: {sell.head()}")  # Debugging line
-            buy_signals.append(buy)
-            sell_signals.append(sell)
+        # Process subsequent indicators (AUX signals)
+        for indicator in self.indicators[1:]:
+            aux_buy, aux_sell = indicator.aux_signal()
+            print(f"AUX signals - Buy: {aux_buy.head()}, Sell: {aux_sell.head()}")  # Debugging line
+            buy_signals.append(aux_buy)
+            sell_signals.append(aux_sell)
 
-        # Get AUX signals from the third indicator, if present
-        if len(self.indicators) > 2:
-            buy, sell = self.indicators[2].aux_signal()
-            print(f"AUX signals - Buy: {buy.head()}, Sell: {sell.head()}")  # Debugging line
-            buy_signals.append(buy)
-            sell_signals.append(sell)
-
-        # Combine the signals (consider changing 'all' to 'any' if you want to act on any signal)
+        # Combine the signals using 'any' to generate a signal if any of the conditions are met
         combined_buy_signal = pd.concat(buy_signals, axis=1).any(axis=1)
         combined_sell_signal = pd.concat(sell_signals, axis=1).any(axis=1)
 
