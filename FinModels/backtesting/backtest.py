@@ -12,6 +12,7 @@ class Backtest:
     def execute(self):
         buy_signals, sell_signals = self.strategy.generate_signals()
         close_prices = self.data['Close']
+        buy_price = None  # Initialize buy_price to avoid scope issues
 
         for i in range(len(close_prices)):
             if buy_signals.iloc[i] and self.position == 0:
@@ -20,7 +21,7 @@ class Backtest:
                 buy_price = close_prices.iloc[i]
                 self.history.append({'Date': close_prices.index[i], 'Action': 'Buy', 'Price': buy_price})
                 print(f"Buy at {buy_price} on {close_prices.index[i]}")
-            elif sell_signals.iloc[i] and self.position == 1:
+            elif sell_signals.iloc[i] and self.position == 1 and buy_price is not None:
                 # Sell action
                 self.position = 0
                 sell_price = close_prices.iloc[i]

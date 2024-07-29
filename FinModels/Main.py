@@ -1,5 +1,6 @@
 import sys
 import os
+import pandas as pd
 
 # Add the FinModels directory to the Python path
 finmodels_path = r'C:\Users\DaComputs\Documents\GitHub\FinResearch\FinModels'
@@ -11,6 +12,7 @@ from data.yahoo_finance_data import YahooFinanceData
 from strategies.combined_indicator_strategy import CombinedIndicatorStrategy
 from backtesting.backtest import Backtest
 from metrics import BacktestMetrics, ReturnAnalysis, TGR, CAGR
+import yfinance as yf
 
 
 class FinanceBacktester:
@@ -36,7 +38,14 @@ class FinanceBacktester:
         yahoo_data = YahooFinanceData(self.ticker, self.start_date, self.end_date, self.interval)
         yahoo_data.fetch_data()
         self.data = yahoo_data.get_data()
-
+        self.data.index = pd.to_datetime(self.data.index)  # Convert the index to datetime format
+        # Debugging lines
+        print("Data fetched:")  # Check the first few rows of the data
+        print(self.data.head())  
+        print("Columns in the data:")  # Check the column names
+        print(self.data.columns)
+        # End of debugging lines
+        
     def initialize_indicators(self, indicators_to_use):
         indicators = []
         for indicator_name in indicators_to_use:
@@ -62,6 +71,8 @@ class FinanceBacktester:
     def analyze_metrics(self, backtest_history):
         if backtest_history is not None:
             metrics = BacktestMetrics(backtest_history, self.initial_balance)
+            print("Backtest history data:")  # Debugging line
+            print(backtest_history.head())  # Debugging line: check the content of backtest_history
             all_metrics = metrics.calculate_all_metrics()
             annual_returns = metrics.calculate_annual_returns()
             return all_metrics, annual_returns
@@ -90,11 +101,11 @@ class FinanceBacktester:
 def main():
     # Set up the parameters
     ticker = "AAPL"
-    start_date = "2020-01-01"
-    end_date = "2021-01-01"
+    start_date = "2015-01-01"
+    end_date = "2023-01-01"
     interval = "1d"
     initial_balance = 100000  # Example initial balance
-    indicators_to_use = ['BollingerBands', 'ADX', 'RSI']  # User-defined list of indicators, CROSS; AUX: AUX
+    indicators_to_use = ['BollingerBands']  # User-defined list of indicators, CROSS; AUX: AUX
 
     # Initialize the backtester
     backtester = FinanceBacktester(ticker, start_date, end_date, interval, initial_balance)
@@ -112,5 +123,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    
