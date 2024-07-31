@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 from Indicators import ADX, BB, EMA, KC, MACD, RSI, VI
 from data.yahoo_finance_data import YahooFinanceData
 from strategies.combined_indicator_strategy import CombinedIndicatorStrategy
@@ -7,7 +6,7 @@ from backtesting.backtest import Backtest
 from metrics import BacktestMetrics, ReturnAnalysis, TGR, CAGR
 
 class FinanceBacktester:
-    def __init__(self, ticker, start_date, end_date, interval, initial_balance):      
+    def __init__(self, ticker, start_date, end_date, interval, initial_balance):
         self.ticker = ticker
         self.start_date = start_date
         self.end_date = end_date
@@ -29,10 +28,7 @@ class FinanceBacktester:
         yahoo_data = YahooFinanceData(self.ticker, self.start_date, self.end_date, self.interval)
         yahoo_data.fetch_data()
         self.data = yahoo_data.get_data()
-        if not self.data.empty:
-            self._process_data()
-        else:
-            print("No data fetched.")
+        self._process_data()
 
     def _process_data(self):
         self.data.index = pd.to_datetime(self.data.index)
@@ -53,12 +49,8 @@ class FinanceBacktester:
 
     def _create_indicator(self, indicator_name, numeric_data):
         indicator_class = self.indicator_classes.get(indicator_name)
-        if indicator_class:
-            params = self._get_indicator_params(indicator_name)
-            return indicator_class(numeric_data, **params) if indicator_name != 'EMA' else indicator_class(numeric_data, params['short_window'], params['long_window'])
-        else:
-            print(f"Warning: Indicator '{indicator_name}' not found.")
-            return None
+        params = self._get_indicator_params(indicator_name)
+        return indicator_class(numeric_data, **params) if indicator_name != 'EMA' else indicator_class(numeric_data, params['short_window'], params['long_window'])
 
     def _get_indicator_params(self, indicator_name):
         params = {
@@ -73,24 +65,17 @@ class FinanceBacktester:
         return params.get(indicator_name, {})
 
     def run_backtest(self):
-        if self.data is not None and self.strategy is not None:
-            backtest = Backtest(self.strategy, self.data, self.initial_balance)
-            backtest_history = backtest.execute()
-            return self._process_backtest_history(backtest_history)
-        else:
-            print("Data or Strategy not initialized.")
-            return None
+        backtest = Backtest(self.strategy, self.data, self.initial_balance)
+        backtest_history = backtest.execute()
+        return self._process_backtest_history(backtest_history)
 
     def _process_backtest_history(self, backtest_history):
-        if backtest_history is not None:
-            if len(backtest_history) <= len(self.data):
-                backtest_history['Date'] = self.data['Date'].iloc[:len(backtest_history)]
-            else:
-                print("Warning: Mismatch in the length of original data and backtest history.")
-            backtest_history['Date'] = pd.to_datetime(backtest_history['Date'])
-            backtest_history.reset_index(drop=True, inplace=True)
-            backtest_history = backtest_history.loc[:, ~backtest_history.columns.duplicated()]
-            self._print_backtest_summary(backtest_history)
+        if len(backtest_history) <= len(self.data):
+            backtest_history['Date'] = self.data['Date'].iloc[:len(backtest_history)]
+        backtest_history['Date'] = pd.to_datetime(backtest_history['Date'])
+        backtest_history.reset_index(drop=True, inplace=True)
+        backtest_history = backtest_history.loc[:, ~backtest_history.columns.duplicated()]
+        self._print_backtest_summary(backtest_history)
         return backtest_history
 
     def _print_backtest_summary(self, backtest_history):
@@ -100,43 +85,26 @@ class FinanceBacktester:
         print(backtest_history.columns)
 
     def analyze_metrics(self, backtest_history):
-        if backtest_history is not None and not backtest_history.empty:
-            if 'Date' in backtest_history.columns:
-                backtest_history['Date'] = pd.to_datetime(backtest_history['Date'])
-            else:
-                print("Error: 'Date' column is missing in backtest history.")
-                return None, None
-            metrics = BacktestMetrics(backtest_history, self.initial_balance)
-            all_metrics = metrics.calculate_all_metrics()
-            annual_returns = metrics.calculate_annual_returns()
-            print(f"Annual Returns: {annual_returns}")  # Debug print to see annual returns
-            if not annual_returns:
-                print("No annual returns data available.")
-                return all_metrics, None
-            return all_metrics, annual_returns
-        else:
-            print("Backtest history is None or empty.")
-            return None, None
+        backtest_history['Date'] = pd.to_datetime(backtest_history['Date'])
+        metrics = BacktestMetrics(backtest_history, self.initial_balance, self.start_date, self.end_date)
+        all_metrics = metrics.calculate_all_metrics()
+        annual_returns = metrics.calculate_annual_returns()
+        print(f"Annual Returns: {annual_returns}")
+        return all_metrics, annual_returns
 
     def print_results(self, all_metrics, annual_returns):
         print("\nPerformance Metrics:")
-        if all_metrics:
-            for key, value in all_metrics.items():
-                print(f"{key}: {value:.2f}")
-        else:
-            print("No performance metrics available.")
+        for key, value in all_metrics.items():
+            print(f"{key}: {value:.2f}")
         print("\nAnnual Returns:")
-        if annual_returns is not None:
-            print(annual_returns)
-            return_analysis = ReturnAnalysis(annual_returns)
-            print("\nReturn Analysis Summary:")
-            print(return_analysis.get_summary())
-            tgr = TGR(annual_returns)
-            print(f"\nTotal Growth Rate (TGR): {tgr.calculate():.2f}%")
-            cagr = CAGR(annual_returns)
-            print(f"Compound Annual Growth Rate (CAGR): {cagr.calculate():.2f}%")
-        else:
-            print("No annual returns data available.")
+        print(annual_returns)
+        return_analysis = ReturnAnalysis(annual_returns)
+        print("\nReturn Analysis Summary:")
+        print(return_analysis.get_summary())
+        tgr = TGR(annual_returns)
+        print(f"\nTotal Growth Rate (TGR): {tgr.calculate():.2f}%")
+        cagr = CAGR(annual_returns)
+        print(f"Compound Annual Growth Rate (CAGR): {cagr.calculate():.2f}%")
 
 def configure_backtest():
     ticker = "IBM"
@@ -158,4 +126,3 @@ def run():
 
 if __name__ == "__main__":
     run()
-

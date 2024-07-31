@@ -3,10 +3,16 @@ import numpy as np
 
 class ReturnAnalysis:
     def __init__(self, returns):
+        """
+        Initialize ReturnAnalysis with annual returns.
+
+        :param returns: A list or array-like structure containing annual returns.
+        :raises ValueError: If returns are not a non-empty list or array-like of numbers.
+        """
         if not isinstance(returns, (list, np.ndarray)) or len(returns) == 0:
             raise ValueError("Returns must be a non-empty list or array-like of numbers.")
-
-        self.returns = np.array(returns)
+        
+        self.returns = np.array(returns, dtype=np.float64)
         self.num_years = len(self.returns)
         self.avg_return = np.mean(self.returns)
         self.std_deviation = np.std(self.returns)
@@ -17,6 +23,11 @@ class ReturnAnalysis:
         self.max_return = np.max(self.returns)
 
     def get_summary(self):
+        """
+        Generate a summary of the return analysis.
+
+        :return: A dictionary containing the summary statistics.
+        """
         return {
             "Number of Years": self.num_years,
             "Average Return Rate (%)": self.avg_return,
@@ -37,4 +48,11 @@ class ReturnAnalysis:
         summary = self.get_summary()
         return pd.DataFrame([summary])
 
+    def summary_as_string(self):
+        """
+        Get a string representation of the summary statistics.
 
+        :return: A string containing the formatted summary statistics.
+        """
+        summary = self.get_summary()
+        return '\n'.join(f"{key}: {value:.2f}" for key, value in summary.items())
