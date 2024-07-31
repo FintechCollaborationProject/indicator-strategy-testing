@@ -37,9 +37,9 @@ class BacktestMetrics:
 
         :return: Annualized return as a percentage.
         """
-        num_days = (self.history['Date'].iloc[-1] - self.history['Date'].iloc[0]).days if not self.history.empty else 1
-        total_return = self.history['Portfolio Value'].iloc[-1] / self.initial_balance - 1 if num_days > 0 else 0
-        annualized_return = (1 + total_return) ** (365.25 / num_days) - 1
+        num_days = (self.end_date - self.start_date).days + 1
+        total_return = self.history['Portfolio Value'].iloc[-1] / self.initial_balance - 1
+        annualized_return = (1 + total_return) ** (365 / num_days) - 1
         return annualized_return * 100
 
     def sharpe_ratio(self, risk_free_rate=0.01):
@@ -72,7 +72,7 @@ class BacktestMetrics:
         :return: Dictionary of all calculated metrics.
         """
         num_days = (self.end_date - self.start_date).days + 1  # +1 to include both start and end dates
-        num_years = num_days / 365.25  # Using a typical year length including leap years
+        num_years = num_days / 365  # Using a typical year length including leap years
         metrics = {
             'Total Return (%)': self.total_return(),
             'Annualized Return (%)': self.annualized_return(),

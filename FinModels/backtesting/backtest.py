@@ -59,7 +59,7 @@ class Backtest:
         print(f"Final balance: {self.balance}")
         return history_df
 
-    def annualized_return(self):
+    #def annualized_return(self):
         """
         Calculate the annualized return of the backtest.
 

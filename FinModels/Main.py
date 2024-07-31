@@ -107,8 +107,8 @@ class FinanceBacktester:
         print(f"Compound Annual Growth Rate (CAGR): {cagr.calculate():.2f}%")
 
 def configure_backtest():
-    ticker = "IBM"
-    start_date = "2022-06-01"
+    ticker = "AAPL"
+    start_date = "2020-06-01"
     end_date = "2023-01-01"
     interval = "1d"
     initial_balance = 100000
