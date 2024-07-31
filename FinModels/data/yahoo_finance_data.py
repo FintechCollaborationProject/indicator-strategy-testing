@@ -49,3 +49,18 @@ class YahooFinanceData:
         else:
             print("Data not available. Please fetch data first.")
             return None
+    def buy_and_hold(self):
+        """
+        Execute the Buy and Hold strategy.
+
+        :return: The initial and final values of the investment.
+        """
+        if self.data is None or self.data.empty:
+            print("No data available for Buy and Hold strategy.")
+            return None, None
+
+        buy_price = self.data['Close'].iloc[0]
+        position = self.initial_balance // buy_price
+        cash = self.initial_balance - position * buy_price
+        final_value = cash + position * self.data['Close'].iloc[-1]
+        return self.initial_balance, final_value

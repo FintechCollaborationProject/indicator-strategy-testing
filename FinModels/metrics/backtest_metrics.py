@@ -90,7 +90,8 @@ class BacktestMetrics:
         :return: List of annual returns as percentages.
         """
         assert 'Date' in self.history.columns, "Error: 'Date' column not found in history."
-
+        num_days = (self.end_date - self.start_date).days + 1
+        num_years = num_days / 365
         self.history['Date'] = pd.to_datetime(self.history['Date'])
         self.history.set_index('Date', inplace=True)
         self.history['Cumulative Balance'] = self.history['Profit'].cumsum() + self.initial_balance
@@ -102,4 +103,4 @@ class BacktestMetrics:
             annual_return = (end_value - start_value) / start_value * 100
             annual_returns.append(annual_return)
 
-        return annual_returns
+        return annual_returns, num_years

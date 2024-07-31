@@ -30,14 +30,14 @@ class Backtest:
 
         for i in range(len(close_prices)):
             date = close_prices.index[i]
-            print(f"Date: {date}, Close Price: {close_prices.iloc[i]}")
+            #print(f"Date: {date}, Close Price: {close_prices.iloc[i]}")
 
             if buy_signals.iloc[i] and self.position == 0:
                 # Execute buy action
                 self.position = 1
                 buy_price = close_prices.iloc[i]
                 self.history.append({'Date': date, 'Action': 'Buy', 'Price': buy_price, 'Profit': 0})
-                print(f"Buy at {buy_price} on {date}")
+                #print(f"Buy at {buy_price} on {date}")
 
             elif sell_signals.iloc[i] and self.position == 1:
                 # Execute sell action
@@ -46,10 +46,10 @@ class Backtest:
                 self.balance += profit
                 self.position = 0
                 self.history.append({'Date': date, 'Action': 'Sell', 'Price': sell_price, 'Profit': profit})
-                print(f"Sell at {sell_price} on {date}; Profit: {profit}")
+                #print(f"Sell at {sell_price} on {date}; Profit: {profit}")
 
-            else:
-                print("No action taken.")
+            #else:
+                #print("No action taken.")
 
         # Convert 'Date' to datetime and ensure 'Profit' column has numerical values
         history_df = pd.DataFrame(self.history)
@@ -59,7 +59,7 @@ class Backtest:
         print(f"Final balance: {self.balance}")
         return history_df
 
-    #def annualized_return(self):
+    def annualized_return(self):
         """
         Calculate the annualized return of the backtest.
 
@@ -70,7 +70,7 @@ class Backtest:
         history_df.set_index('Date', inplace=True)
         
         num_days = (history_df.index[-1] - history_df.index[0]).days
-        print(f"*****backtest number of days: {num_days}")
+        #print(f"*****backtest number of days: {num_days}")
 
         if num_days > 0:
             total_return = (history_df['Profit'].sum() + self.initial_balance) / self.initial_balance

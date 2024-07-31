@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 class ReturnAnalysis:
-    def __init__(self, returns):
+    def __init__(self, returns, num_years):
         """
         Initialize ReturnAnalysis with annual returns.
 
@@ -13,7 +13,7 @@ class ReturnAnalysis:
             raise ValueError("Returns must be a non-empty list or array-like of numbers.")
         
         self.returns = np.array(returns, dtype=np.float64)
-        self.num_years = len(self.returns)
+        self.num_years = num_years
         self.avg_return = np.mean(self.returns)
         self.std_deviation = np.std(self.returns)
         self.median_return = np.median(self.returns)

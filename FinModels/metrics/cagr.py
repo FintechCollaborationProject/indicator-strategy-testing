@@ -1,7 +1,7 @@
 import numpy as np
 
 class CAGR:
-    def __init__(self, returns):
+    def __init__(self, returns, num_years):
         """
         Initialize the CAGR object.
 
@@ -13,7 +13,7 @@ class CAGR:
         
         # Ensure all elements are numeric
         self.returns = np.array(returns, dtype=float)
-        self.num_years = len(self.returns)
+        self.num_years = num_years
     
     def calculate(self):
         """

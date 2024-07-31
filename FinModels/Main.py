@@ -68,6 +68,21 @@ class FinanceBacktester:
         backtest = Backtest(self.strategy, self.data, self.initial_balance)
         backtest_history = backtest.execute()
         return self._process_backtest_history(backtest_history)
+    
+    def run_buy_and_hold(self):
+        initial_bh, final_bh = self.buy_and_hold()
+        print(f"Buy and Hold Strategy: Initial = ${initial_bh:.2f}, Final = ${final_bh:.2f}, Return = ${(final_bh - initial_bh):.2f}")
+
+    def buy_and_hold(self):
+        if self.data is None or self.data.empty:
+            print("No data available for Buy and Hold strategy.")
+            return None, None
+
+        buy_price = self.data['Close'].iloc[0]
+        position = self.initial_balance // buy_price
+        cash = self.initial_balance - position * buy_price
+        final_value = cash + position * self.data['Close'].iloc[-1]
+        return self.initial_balance, final_value
 
     def _process_backtest_history(self, backtest_history):
         if len(backtest_history) <= len(self.data):
@@ -75,54 +90,56 @@ class FinanceBacktester:
         backtest_history['Date'] = pd.to_datetime(backtest_history['Date'])
         backtest_history.reset_index(drop=True, inplace=True)
         backtest_history = backtest_history.loc[:, ~backtest_history.columns.duplicated()]
-        self._print_backtest_summary(backtest_history)
+        #self._print_backtest_summary(backtest_history)
         return backtest_history
 
-    def _print_backtest_summary(self, backtest_history):
-        print("\nBacktest history data after processing:")
-        print(backtest_history.head())
-        print("\nColumns in backtest history:")
-        print(backtest_history.columns)
+    #def _print_backtest_summary(self, backtest_history):
+        #print("\nBacktest history data after processing:")
+        #print(backtest_history.head())
+        #print("\nColumns in backtest history:")
+        #print(backtest_history.columns)
 
     def analyze_metrics(self, backtest_history):
         backtest_history['Date'] = pd.to_datetime(backtest_history['Date'])
         metrics = BacktestMetrics(backtest_history, self.initial_balance, self.start_date, self.end_date)
         all_metrics = metrics.calculate_all_metrics()
-        annual_returns = metrics.calculate_annual_returns()
-        print(f"Annual Returns: {annual_returns}")
-        return all_metrics, annual_returns
+        annual_returns, num_years = metrics.calculate_annual_returns()
+        #print(f"Annual Returns: {annual_returns}")
+        return all_metrics, annual_returns, num_years
 
-    def print_results(self, all_metrics, annual_returns):
+    def print_results(self, all_metrics, annual_returns, num_years):
         print("\nPerformance Metrics:")
         for key, value in all_metrics.items():
             print(f"{key}: {value:.2f}")
         print("\nAnnual Returns:")
         print(annual_returns)
-        return_analysis = ReturnAnalysis(annual_returns)
+        return_analysis = ReturnAnalysis(annual_returns, num_years)
         print("\nReturn Analysis Summary:")
         print(return_analysis.get_summary())
         tgr = TGR(annual_returns)
         print(f"\nTotal Growth Rate (TGR): {tgr.calculate():.2f}%")
-        cagr = CAGR(annual_returns)
+        cagr = CAGR(annual_returns, num_years)
         print(f"Compound Annual Growth Rate (CAGR): {cagr.calculate():.2f}%")
 
 def configure_backtest():
     ticker = "AAPL"
-    start_date = "2020-06-01"
-    end_date = "2023-01-01"
+    start_date = "2023-01-01"
+    end_date = "2024-01-01"
     interval = "1d"
     initial_balance = 100000
-    indicators_to_use = ["BB"]
-    return ticker, start_date, end_date, interval, initial_balance, indicators_to_use 
+    indicators_to_use = ["BB", "RSI"]
+    strategy = "buy_and_hold"
+    return ticker, start_date, end_date, interval, initial_balance, indicators_to_use, strategy 
 
 def run():
-    ticker, start_date, end_date, interval, initial_balance, indicators_to_use = configure_backtest()
+    ticker, start_date, end_date, interval, initial_balance, indicators_to_use, strategy = configure_backtest()
     backtester = FinanceBacktester(ticker, start_date, end_date, interval, initial_balance)
     backtester.fetch_data()
+    backtester.run_buy_and_hold()
     backtester.initialize_indicators(indicators_to_use)
     backtest_history = backtester.run_backtest()
-    all_metrics, annual_returns = backtester.analyze_metrics(backtest_history)
-    backtester.print_results(all_metrics, annual_returns)
+    all_metrics, annual_returns, num_years = backtester.analyze_metrics(backtest_history)
+    backtester.print_results(all_metrics, annual_returns, num_years)
 
 if __name__ == "__main__":
     run()
