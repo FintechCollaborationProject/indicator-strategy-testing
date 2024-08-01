@@ -56,7 +56,7 @@ class Backtest:
         history_df['Date'] = pd.to_datetime(history_df['Date'])
         history_df['Profit'] = history_df['Profit'].astype(float)
 
-        print(f"Final balance: {self.balance}")
+        print(f"Strategy: Initial = {self.initial_balance: .2f}, Final balance = {self.balance: .2f}, Return = ${(self.balance - self.initial_balance):.2f}")
         return history_df
 
     def annualized_return(self):

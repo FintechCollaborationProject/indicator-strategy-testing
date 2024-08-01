@@ -6,22 +6,23 @@ class MACD:
         self.short_window = short_window
         self.long_window = long_window
         self.signal_window = signal_window
-        self.macd_line, self.signal_line, self.histogram = self.calculate_macd()
+        self.dif, self.dea = self.calculate_macd()
     
     def calculate_macd(self):
         short_ema = self.prices['Close'].ewm(span=self.short_window, adjust=False).mean()
         long_ema = self.prices['Close'].ewm(span=self.long_window, adjust=False).mean()
-        macd_line = short_ema - long_ema
-        signal_line = macd_line.ewm(span=self.signal_window, adjust=False).mean()
-        histogram = macd_line - signal_line
-        return macd_line, signal_line, histogram
-
+        dif = short_ema - long_ema
+        dea = dif.ewm(span=self.signal_window, adjust=False).mean()
+        return dif, dea
+    
     def cross_signal(self):
-        buy_signal = (self.macd_line > self.signal_line) & (self.macd_line.shift(1) <= self.signal_line.shift(1))
-        sell_signal = (self.macd_line < self.signal_line) & (self.macd_line.shift(1) >= self.signal_line.shift(1))
+        buy_signal = (self.dif > self.dea).shift(1) & (self.dif <= self.dea)
+        sell_signal = (self.dif < self.dea).shift(1) & (self.dif >= self.dea)
         return buy_signal, sell_signal
 
     def aux_signal(self):
-        buy_signal = self.macd_line > self.signal_line
-        sell_signal = self.macd_line < self.signal_line
+        ma_10 = self.prices['Close'].rolling(window=10).mean()
+        ma_30 = self.prices['Close'].rolling(window=30).mean()
+        buy_signal = ma_10 > ma_30
+        sell_signal = ma_10 < ma_30
         return buy_signal, sell_signal

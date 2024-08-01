@@ -3,31 +3,42 @@ import numpy as np
 
 class ADX:
     def __init__(self, prices, window=14):
-        if prices.empty:
-            raise ValueError("Input data is empty.")
         self.prices = prices
         self.window = window
-        self.adx = self.calculate_adx()
+        self.adx, self.plus_di, self.minus_di = self.calculate_adx()
     
     def calculate_adx(self):
         high = self.prices['High']
         low = self.prices['Low']
         close = self.prices['Close']
 
-        plus_dm = np.where((high.diff() > low.diff()) & (high.diff() > 0), high.diff(), 0)
-        minus_dm = np.where((low.diff() > high.diff()) & (low.diff() > 0), low.diff(), 0)
+        # Calculate True Range (TR)
+        tr1 = high - low
+        tr2 = abs(high - close.shift(1))
+        tr3 = abs(low - close.shift(1))
+        tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
 
-        atr = (high.combine(low, max) - high.combine(low, min)).rolling(window=self.window).mean()
+        # Calculate +DI and -DI
+        plus_dm = high.diff()
+        minus_dm = low.diff()
 
-        plus_di = 100 * (plus_dm / atr).ewm(span=self.window, adjust=False).mean()
-        minus_di = 100 * (minus_dm / atr).ewm(span=self.window, adjust=False).mean()
+        plus_dm[plus_dm < 0] = 0
+        minus_dm[minus_dm > 0] = 0
+        minus_dm = minus_dm.abs()
 
-        dx = 100 * np.abs((plus_di - minus_di) / (plus_di + minus_di)).fillna(0)
-        adx = dx.ewm(span=self.window, adjust=False).mean()
-        
-        return adx
+        tr_rolling = tr.rolling(window=self.window).sum()
+        plus_di = 100 * (plus_dm.rolling(window=self.window).sum() / tr_rolling)
+        minus_di = 100 * (minus_dm.rolling(window=self.window).sum() / tr_rolling)
+
+        # Calculate DX
+        dx = 100 * (abs(plus_di - minus_di) / (plus_di + minus_di))
+
+        # Calculate ADX
+        adx = dx.rolling(window=self.window).mean()
+
+        return adx, plus_di, minus_di
 
     def aux_signal(self):
-        buy_signal = self.adx > 25
-        sell_signal = self.adx < 25
+        buy_signal = (self.adx > 25) & (self.plus_di > self.minus_di)
+        sell_signal = (self.adx > 25) & (self.minus_di > self.plus_di)
         return buy_signal, sell_signal

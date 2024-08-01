@@ -1,5 +1,9 @@
 import pandas as pd
-from Indicators import ADX, BB, EMA, KC, MACD, RSI, VI
+from Indicators import (
+    ADI, ADX, BB, CCI, DEMA, DPO, EMA, EMV, KC, KDJ, MA, MACD, MAE, MFI, MOM, OBV,
+    OSC, PSAR, REX, RMA, RSI, TEMA, TRIX, UO, VI, WPR
+)
+
 from data.yahoo_finance_data import YahooFinanceData
 from strategies.combined_indicator_strategy import CombinedIndicatorStrategy
 from backtesting.backtest import Backtest
@@ -15,14 +19,12 @@ class FinanceBacktester:
         self.data = None
         self.strategy = None
         self.indicator_classes = {
-            'VI': VI,
-            'EMA': EMA,
-            'RSI': RSI,
-            'ADX': ADX,
-            'BB': BB,
-            'KC': KC,
-            'MACD': MACD
-        }
+    'ADI': ADI, 'ADX': ADX, 'BB': BB, 'CCI': CCI, 'DEMA': DEMA,
+    'DPO': DPO, 'EMA': EMA, 'EMV': EMV, 'KC': KC, 'KDJ': KDJ, 'MA': MA,
+    'MACD': MACD, 'MAE': MAE, 'MFI': MFI, 'MOM': MOM, 'OBV': OBV,
+    'OSC': OSC, 'PSAR': PSAR, 'REX': REX, 'RMA': RMA, 'RSI': RSI,
+    'TEMA': TEMA, 'TRIX': TRIX, 'UO': UO, 'VI': VI, 'WPR': WPR
+}
 
     def fetch_data(self):
         yahoo_data = YahooFinanceData(self.ticker, self.start_date, self.end_date, self.interval)
@@ -54,13 +56,32 @@ class FinanceBacktester:
 
     def _get_indicator_params(self, indicator_name):
         params = {
-            'EMA': {'short_window': 12, 'long_window': 26},
-            'BB': {'window': 20, 'num_std_dev': 2},
+            'ADI': {},  # Add specific parameters if needed
             'ADX': {'window': 14},
-            'MACD': {'short_window': 12, 'long_window': 26, 'signal_window': 9},
-            'RSI': {'window': 14},
+            'BB': {'window': 20, 'num_std_dev': 2},
+            'CCI': {'window': 20},
+            'DEMA': {'short_window': 10, 'long_window': 20},
+            'DPO': {'window': 10},
+            'EMA': {'short_window' : 5, 'medium_window' : 10, 'long_window' : 30},
+            'EMV': {'window': 9},
             'KC': {'window': 20, 'multiplier': 2},
-            'VI': {'window': 14}
+            'KDJ': {'window': 9},
+            'MA': {'short_window': 10, 'long_window' : 30},
+            'MACD': {'short_window': 12, 'long_window': 26, 'signal_window': 9},
+            'MAE': {'window' : 20, 'k' : 3},
+            'MFI': {'n1': 14, 'n2' : 9},
+            'MOM': {'window': 14},
+            'OBV': {},  # No specific parameters needed
+            'OSC': {'short_window' : 12, 'long_window':26},
+            'PSAR': {'af_increment': 0.02, 'af_max': 0.2},
+            'REX': {'short_window': 2, 'long_window': 10},
+            'RMA': {'short_window': 10, 'long_window': 30},
+            'RSI': {'window': 14},
+            'TEMA': {'short_window': 10, 'long_window': 30},
+            'TRIX': {'short_window': 12, 'long_window': 24},
+            'UO': {'n1' : 7, 'n2' : 14, 'n3' : 28, 'ns' : 3, 'nl' : 7},
+            'VI': {'window': 14},
+            'WPR': {'window': 14}
         }
         return params.get(indicator_name, {})
 
@@ -122,12 +143,14 @@ class FinanceBacktester:
         print(f"Compound Annual Growth Rate (CAGR): {cagr.calculate():.2f}%")
 
 def configure_backtest():
-    ticker = "AAPL"
-    start_date = "2023-01-01"
+    ticker = "GOOGL"
+    start_date = "2010-01-01"
     end_date = "2024-01-01"
     interval = "1d"
     initial_balance = 100000
-    indicators_to_use = ["BB", "RSI"]
+    # Cross & AUX: BB, DEMA, EMA, EMV, KC, KDJ, MA, MACD, MFI, REX, RMA, TEMA, TRIX, UO, VI
+    # AUX: ADI, ADX, CCI, DPO, MAE, MOM, OBV, OSC, PSAR, RSI, WPR
+    indicators_to_use = ['BB', 'ADX', 'BB']
     strategy = "buy_and_hold"
     return ticker, start_date, end_date, interval, initial_balance, indicators_to_use, strategy 
 

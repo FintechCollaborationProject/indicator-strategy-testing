@@ -17,7 +17,7 @@ class BB:
 
     def cross_signal(self):
         buy_signal = (self.prices['Close'] > self.lower_band).shift(1) & (self.prices['Close'] <= self.lower_band)
-        sell_signal = (self.prices['Close'] < self.upper_band).shift(1) & (self.prices['Close'] >= self.upper_band)
+        sell_signal = (self.prices['Close'] < self.lower_band).shift(1) | (self.prices['Close'] > self.upper_band)
         return buy_signal, sell_signal
 
     def aux_signal(self):
