@@ -1,11 +1,12 @@
 import pandas as pd
+import itertools
 from Indicators import (
     ADI, ADX, BB, CCI, DEMA, DPO, EMA, EMV, KC, KDJ, MA, MACD, MAE, MFI, MOM, OBV,
     OSC, PSAR, REX, RMA, RSI, TEMA, TRIX, UO, VI, WPR
 )
-
 from data.yahoo_finance_data import YahooFinanceData
 from strategies.combined_indicator_strategy import CombinedIndicatorStrategy
+from strategies.indicator_combinations import TradingIndicatorCombinations
 from backtesting.backtest import Backtest
 from metrics import BacktestMetrics, ReturnAnalysis, TGR, CAGR
 
@@ -19,12 +20,12 @@ class FinanceBacktester:
         self.data = None
         self.strategy = None
         self.indicator_classes = {
-    'ADI': ADI, 'ADX': ADX, 'BB': BB, 'CCI': CCI, 'DEMA': DEMA,
-    'DPO': DPO, 'EMA': EMA, 'EMV': EMV, 'KC': KC, 'KDJ': KDJ, 'MA': MA,
-    'MACD': MACD, 'MAE': MAE, 'MFI': MFI, 'MOM': MOM, 'OBV': OBV,
-    'OSC': OSC, 'PSAR': PSAR, 'REX': REX, 'RMA': RMA, 'RSI': RSI,
-    'TEMA': TEMA, 'TRIX': TRIX, 'UO': UO, 'VI': VI, 'WPR': WPR
-}
+            'ADI': ADI, 'ADX': ADX, 'BB': BB, 'CCI': CCI, 'DEMA': DEMA,
+            'DPO': DPO, 'EMA': EMA, 'EMV': EMV, 'KC': KC, 'KDJ': KDJ, 'MA': MA,
+            'MACD': MACD, 'MAE': MAE, 'MFI': MFI, 'MOM': MOM, 'OBV': OBV,
+            'OSC': OSC, 'PSAR': PSAR, 'REX': REX, 'RMA': RMA, 'RSI': RSI,
+            'TEMA': TEMA, 'TRIX': TRIX, 'UO': UO, 'VI': VI, 'WPR': WPR
+        }
 
     def fetch_data(self):
         yahoo_data = YahooFinanceData(self.ticker, self.start_date, self.end_date, self.interval)
@@ -62,24 +63,24 @@ class FinanceBacktester:
             'CCI': {'window': 20},
             'DEMA': {'short_window': 10, 'long_window': 20},
             'DPO': {'window': 10},
-            'EMA': {'short_window' : 5, 'medium_window' : 10, 'long_window' : 30},
+            'EMA': {'short_window': 5, 'medium_window': 10, 'long_window': 30},
             'EMV': {'window': 9},
             'KC': {'window': 20, 'multiplier': 2},
             'KDJ': {'window': 9},
-            'MA': {'short_window': 10, 'long_window' : 30},
+            'MA': {'short_window': 10, 'long_window': 30},
             'MACD': {'short_window': 12, 'long_window': 26, 'signal_window': 9},
-            'MAE': {'window' : 20, 'k' : 3},
-            'MFI': {'n1': 14, 'n2' : 9},
+            'MAE': {'window': 20, 'k': 3},
+            'MFI': {'n1': 14, 'n2': 9},
             'MOM': {'window': 14},
             'OBV': {},  # No specific parameters needed
-            'OSC': {'short_window' : 12, 'long_window':26},
+            'OSC': {'short_window': 12, 'long_window': 26},
             'PSAR': {'af_increment': 0.02, 'af_max': 0.2},
             'REX': {'short_window': 2, 'long_window': 10},
             'RMA': {'short_window': 10, 'long_window': 30},
             'RSI': {'window': 14},
             'TEMA': {'short_window': 10, 'long_window': 30},
             'TRIX': {'short_window': 12, 'long_window': 24},
-            'UO': {'n1' : 7, 'n2' : 14, 'n3' : 28, 'ns' : 3, 'nl' : 7},
+            'UO': {'n1': 7, 'n2': 14, 'n3': 28, 'ns': 3, 'nl': 7},
             'VI': {'window': 14},
             'WPR': {'window': 14}
         }
@@ -89,7 +90,7 @@ class FinanceBacktester:
         backtest = Backtest(self.strategy, self.data, self.initial_balance)
         backtest_history = backtest.execute()
         return self._process_backtest_history(backtest_history)
-    
+
     def run_buy_and_hold(self):
         initial_bh, final_bh = self.buy_and_hold()
         print(f"Buy and Hold Strategy: Initial = ${initial_bh:.2f}, Final = ${final_bh:.2f}, Return = ${(final_bh - initial_bh):.2f}")
@@ -111,21 +112,13 @@ class FinanceBacktester:
         backtest_history['Date'] = pd.to_datetime(backtest_history['Date'])
         backtest_history.reset_index(drop=True, inplace=True)
         backtest_history = backtest_history.loc[:, ~backtest_history.columns.duplicated()]
-        #self._print_backtest_summary(backtest_history)
         return backtest_history
-
-    #def _print_backtest_summary(self, backtest_history):
-        #print("\nBacktest history data after processing:")
-        #print(backtest_history.head())
-        #print("\nColumns in backtest history:")
-        #print(backtest_history.columns)
 
     def analyze_metrics(self, backtest_history):
         backtest_history['Date'] = pd.to_datetime(backtest_history['Date'])
         metrics = BacktestMetrics(backtest_history, self.initial_balance, self.start_date, self.end_date)
         all_metrics = metrics.calculate_all_metrics()
         annual_returns, num_years = metrics.calculate_annual_returns()
-        #print(f"Annual Returns: {annual_returns}")
         return all_metrics, annual_returns, num_years
 
     def print_results(self, all_metrics, annual_returns, num_years):
@@ -143,14 +136,21 @@ class FinanceBacktester:
         print(f"Compound Annual Growth Rate (CAGR): {cagr.calculate():.2f}%")
 
 def configure_backtest():
-    ticker = "GOOGL"
-    start_date = "2010-01-01"
+    ticker = "AAPL"
+    start_date = "2020-01-01"
     end_date = "2024-01-01"
     interval = "1d"
-    initial_balance = 100000
+    # arg for indicators_to_use = [Cross & AUX, AUX or Cross & AUX , AUX or Cross & AUX]
     # Cross & AUX: BB, DEMA, EMA, EMV, KC, KDJ, MA, MACD, MFI, REX, RMA, TEMA, TRIX, UO, VI
     # AUX: ADI, ADX, CCI, DPO, MAE, MOM, OBV, OSC, PSAR, RSI, WPR
-    indicators_to_use = ['BB', 'ADX', 'BB']
+    initial_balance = 100000
+    indicators_to_use = ["ALL"]
+    # indicators_to_use = ["Cross & AUX", "AUX", "none"]
+    # indicators_to_use = ["Cross & AUX", "Cross & AUX", "AUX"]
+    # indicators_to_use = ["Cross & AUX", "Cross & AUX", "Cross & AUX"]
+    # indicators_to_use = ["Cross & AUX", "AUX", "AUX"]
+    # indicators_to_use = ["Cross & AUX", "AUX", "none"]
+    # indicators_to_use = ["Cross & AUX", "none", "none"]
     strategy = "buy_and_hold"
     return ticker, start_date, end_date, interval, initial_balance, indicators_to_use, strategy 
 
@@ -159,10 +159,21 @@ def run():
     backtester = FinanceBacktester(ticker, start_date, end_date, interval, initial_balance)
     backtester.fetch_data()
     backtester.run_buy_and_hold()
-    backtester.initialize_indicators(indicators_to_use)
-    backtest_history = backtester.run_backtest()
-    all_metrics, annual_returns, num_years = backtester.analyze_metrics(backtest_history)
-    backtester.print_results(all_metrics, annual_returns, num_years)
+
+    # Generate all combinations of indicators
+    tic = TradingIndicatorCombinations(indicators_to_use)
+    indicator_combinations = tic.generate_combinations()
+
+    # Run backtest for each combination
+    for combo in indicator_combinations:
+        print(f"\nRunning backtest for combination: {combo}")
+        try:
+            backtester.initialize_indicators(combo)
+            backtest_history = backtester.run_backtest()
+            all_metrics, annual_returns, num_years = backtester.analyze_metrics(backtest_history)
+            backtester.print_results(all_metrics, annual_returns, num_years)
+        except ValueError as e:
+            print(f"Skipping combination {combo} due to error: {e}")
 
 if __name__ == "__main__":
     run()
