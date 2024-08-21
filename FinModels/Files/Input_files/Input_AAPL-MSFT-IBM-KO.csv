@@ -1,0 +1,6 @@
+Ticker,Start_Date,End_Date,Interval,Strategy
+AAPL,2023-01-01,2023-07-01,1d,"[""BB""]"
+MSFT,2023-02-01,2023-08-01,1d,"[""MACD"",""RSI""]"
+IBM,2020-10-15,2022-04-28,1d,"[""MFI"",""MA"",""ADX""]"
+KO,2018-06-05,2019-06-05,1d,"[""Cross & AUX"",""AUX"",""none""]"
+GOOGL,2010-01-01,2022-01-01,1d,"[""ALL""]"
