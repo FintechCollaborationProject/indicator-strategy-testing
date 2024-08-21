@@ -2,7 +2,7 @@
 
 FinResearch is a comprehensive Python library for financial research and analysis. It provides a suite of tools and indicators for technical analysis, backtesting strategies, and evaluating trading performance.
 
-Features
+## Features
 Indicators: A collection of commonly used technical indicators, including:
 
 ADX (Average Directional Index)
@@ -19,3 +19,8 @@ Data Handling: Utilities for handling and processing financial data.
 Metrics: Functions for calculating various performance metrics.
 
 Strategies: Examples of trading strategies that can be customized and tested.
+
+## Setup:
+
+Run `pip install -r requirements.txt`
+Then run `python3 Main.py`
