@@ -140,19 +140,25 @@ def configure_backtest():
     start_date = "2020-01-01"
     end_date = "2024-01-01"
     interval = "1d"
+    initial_balance = 100000
+
+    # Classification of Indicators:
     # arg for indicators_to_use = [Cross & AUX, AUX or Cross & AUX , AUX or Cross & AUX]
     # Cross & AUX: BB, DEMA, EMA, EMV, KC, KDJ, MA, MACD, MFI, REX, RMA, TEMA, TRIX, UO, VI
     # AUX: ADI, ADX, CCI, DPO, MAE, MOM, OBV, OSC, PSAR, RSI, WPR
-    initial_balance = 100000
-    indicators_to_use = ["ALL"]
+    
+    # indicators_to_use = ["BB"] #This can be modified to other combinations as well
+    # indicators_to_use = ["DEMA", "RSI"]
+    # indicators_to_use = ["MA", "CCI", "ADX"]
+    # indicators_to_use = ["ALL"]
     # indicators_to_use = ["Cross & AUX", "AUX", "none"]
     # indicators_to_use = ["Cross & AUX", "Cross & AUX", "AUX"]
     # indicators_to_use = ["Cross & AUX", "Cross & AUX", "Cross & AUX"]
     # indicators_to_use = ["Cross & AUX", "AUX", "AUX"]
     # indicators_to_use = ["Cross & AUX", "AUX", "none"]
-    # indicators_to_use = ["Cross & AUX", "none", "none"]
+    indicators_to_use = ["Cross & AUX", "none", "none"]
     strategy = "buy_and_hold"
-    return ticker, start_date, end_date, interval, initial_balance, indicators_to_use, strategy 
+    return ticker, start_date, end_date, interval, initial_balance, indicators_to_use, strategy
 
 def run():
     ticker, start_date, end_date, interval, initial_balance, indicators_to_use, strategy = configure_backtest()
@@ -160,9 +166,12 @@ def run():
     backtester.fetch_data()
     backtester.run_buy_and_hold()
 
-    # Generate all combinations of indicators
-    tic = TradingIndicatorCombinations(indicators_to_use)
-    indicator_combinations = tic.generate_combinations()
+    # Generate or use predefined combinations of indicators
+    if indicators_to_use == ["ALL"] or "Cross & AUX" in indicators_to_use:
+        tic = TradingIndicatorCombinations(indicators_to_use)
+        indicator_combinations = tic.generate_combinations()
+    else:
+        indicator_combinations = [indicators_to_use]
 
     # Run backtest for each combination
     for combo in indicator_combinations:
